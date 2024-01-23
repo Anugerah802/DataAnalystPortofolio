@@ -20,6 +20,7 @@ order by sum(O.after_discount) desc;
 
 
 -- By Category, compare transaction between 2021 and 2022, find which groups experienced increases and decreases
+-- CTE
 
 WITH Category_transaction2021 as (
     SELECT Year(O.order_date) as Year, S.category, sum(O.after_discount) as Total_transaction2021  
@@ -53,7 +54,7 @@ Limit 5;
 
 
 -- sort by transaction value on this group of product (Samsung, Apple, Sony, Huawei, Lenovo)
-
+-- CTE
 WITH Gadget_transaction as (
     SELECT  S.sku_Id as Product_Id, S.sku_name as ProductName, O.price as Price, 
             O.qty_ordered as Total_order, O.after_discount as Total_transaction,
