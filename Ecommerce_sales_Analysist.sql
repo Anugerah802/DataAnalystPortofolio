@@ -59,72 +59,68 @@ Limit 5;
 
 -- sort by transaction value on this group of product (Samsung, Apple, Sony, Huawei, Lenovo)
 
-WITH Gadget_transaction as (
-    SELECT  S.sku_name as ProductName, O.price as Price, 
-            O.qty_ordered as Total_order, O.after_discount as Total_transaction,
-            'Samsung' as product_brand
+WITH Gadget_Order as (
+    SELECT  DISTINCT O.Id_order as ID_Order, 
+            S.sku_name as Product_name, 'Samsung' as Product_brand, 
+            O.qty_ordered as Total_order, O.after_discount as Total_Transaction   
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE S.sku_name like '%Samsung%'
-    and O.is_valid = 1
-    UNION
-    SELECT  S.sku_name as ProductName, O.price as Price, 
-            O.qty_ordered as Total_order, O.after_discount as Total_transaction,
-            'Apple' as product_brand
+    WHERE O.is_valid = 1 and S.sku_name like '%samsung%'
+        UNION
+    SELECT  DISTINCT O.Id_order as ID_Order, 
+            S.sku_name as Product_name, 'Apple' as Product_brand, 
+            O.qty_ordered as Total_order, O.after_discount as Total_Transaction   
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE S.sku_name like '%Apple%' or S.sku_name like '%Iphone%'
-    and O.is_valid = 1
-    UNION
-    SELECT  S.sku_name as ProductName, O.price as Price, 
-            O.qty_ordered as Total_order, O.after_discount as Total_transaction,
-            'Sony' as product_brand
+    WHERE O.is_valid = 1 and S.sku_name like '%apple%' or S.sku_name like '%iphone%'
+        UNION
+    SELECT  DISTINCT O.Id_order as ID_Order, 
+            S.sku_name as Product_name, 'Sony' as Product_brand, 
+            O.qty_ordered as Total_order, O.after_discount as Total_Transaction   
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE S.sku_name like '%Sony%'
-    and O.is_valid = 1
-    UNION
-    SELECT  S.sku_name as ProductName, O.price as Price, 
-            O.qty_ordered as Total_order, O.after_discount as Total_transaction,
-            'Huawei' as product_brand
+    WHERE O.is_valid = 1 and S.sku_name like '%sony%'
+        UNION
+    SELECT  DISTINCT O.Id_order as ID_Order, 
+            S.sku_name as Product_name, 'Huawei' as Product_brand, 
+            O.qty_ordered as Total_order, O.after_discount as Total_Transaction   
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE S.sku_name like '%Huawei%'
-    and O.is_valid = 1
-    UNION
-    SELECT  S.sku_name as ProductName, O.price as Price, 
-            O.qty_ordered as Total_order, O.after_discount as Total_transaction,
-            'Lenovo' as product_brand
+    WHERE O.is_valid = 1 and S.sku_name like '%huawei%'
+        UNION
+    SELECT  DISTINCT O.Id_order as ID_Order, 
+            S.sku_name as Product_name, 'Lenovo' as Product_brand, 
+            O.qty_ordered as Total_order, O.after_discount as Total_Transaction   
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE S.sku_name like '%Lenovo%'
-    and O.is_valid = 1)
-SELECT  product_brand, sum(Total_order) as Total_order, 
-        sum(Total_transaction) as Total_transaction
-FROM Gadget_transaction
-GROUP by product_brand
-ORDER by Total_transaction desc;
+    WHERE O.is_valid = 1 and S.sku_name like '%lenovo%')
+SELECT  Product_brand,
+        sum(Total_order) as Total_order, 
+        sum(Total_Transaction) as Total_Transaction 
+FROM Gadget_Order
+GROUP by Product_brand
+ORDER by Total_Transaction Desc;
 
 -- sort by transaction value on this group of product (Samsung, Apple, Sony, Huawei, Lenovo) with if condition
 
-WITH Gadget_transaction as (
-    SELECT  
-        CASE 
-            When S.sku_name like '%Samsung%' then 'Samsung'
-            When S.sku_name like '%Apple%' or S.sku_name like '%iphone%' then 'Apple'
-            When S.sku_name like '%Sony%' then 'Sony'
-            When S.sku_name like '%Huawei%' then 'Huawei'
-            When S.sku_name like '%Lenovo%' then 'Lenovo'
-        End as product_brand, 
-        O.qty_ordered as Total_order, 
-        O.after_discount as Total_transaction
+WITH Gadget_Order as (
+    SELECT  DISTINCT O.Id_order, S.sku_name,
+        CASE
+            When S.sku_name like '%samsung%' Then 'Samsung'
+            When S.sku_name like '%sony%' Then 'Sony'
+            When S.sku_name like '%huawei%' Then 'Huawei'
+            When S.sku_name like '%lenovo%' Then 'Lenovo'
+            when Lower(S.sku_name) like '%apple%' or lower(S.sku_name) like '%iphone%' Then 'Apple'
+        END as Product_brand,
+        O.qty_ordered as Total_order,
+        O.after_discount as Total_Transaction
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE O.is_valid = 1
-)
-SELECT  product_brand, sum(Total_order) as Total_order, 
-        sum(Total_transaction) as Total_transaction
-FROM Gadget_transaction
-WHERE product_brand is Not null
-GROUP by product_brand
-ORDER by Total_transaction Desc;
+    WHERE O.is_valid = 1)
+SELECT  Product_brand,
+        sum(Total_order) as Total_order, 
+        sum(Total_Transaction) as Total_Transaction
+FROM Gadget_Order
+WHERE Product_brand is not null
+GROUP by Product_brand
+ORDER by Total_Transaction Desc;
