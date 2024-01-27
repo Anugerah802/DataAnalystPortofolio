@@ -40,7 +40,11 @@ WITH Category_transaction2021 as (
     Group by S.category
     )
 SELECT  Category_transaction2021.Category, Total_transaction2021, Total_transaction2022,
-        ((Total_transaction2022-Total_transaction2021)/Total_transaction2021)*100 as GrowPercentage
+        ((Total_transaction2022-Total_transaction2021)/Total_transaction2021)*100 as GrowPercentage,
+        CASE 
+            When Total_transaction2022 > Total_transaction2021 Then 'Increase'
+            When Total_transaction2022 < Total_transaction2021 Then 'Decrease'
+        END as Exp
 FROM Category_transaction2021
 Join Category_transaction2022 on (Category_transaction2022.category = Category_transaction2021.category)
 Order by GrowPercentage desc;
