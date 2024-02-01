@@ -1,58 +1,59 @@
 -- ## E-COMMERCE SALES ANALYSIST ## --
+
 -- Find Top Transaction in 2021, by month
 
 SELECT  Year(order_date) as Year, Monthname(order_date) as Month, 
-        sum(after_discount) as Total_transaction
+        sum(round(after_discount)) as Total_transaction
 FROM order_detail
 where Year(order_date) = 2021
 and is_valid = 1
 Group by Monthname(order_date)
-order by sum(after_discount) desc;
+order by Total_transaction desc;
 
 
 -- Find Top Transaction in 2022 By Product Category
 
-SELECT Year(O.order_date) as Year, S.category, sum(O.after_discount) as Total_transaction  
+SELECT Year(O.order_date) as Year, S.category, sum(round(O.after_discount)) as Total_transaction  
 FROM order_detail as O
 Join sku_detail as S on (S.sku_Id = O.Id_sku)
 where Year(order_date) = 2022
 and O.is_valid = 1
 Group by S.category
-order by sum(O.after_discount) desc;
+order by Total_transaction desc;
 
 
 -- By Category, compare transaction between 2021 and 2022, find which groups experienced increases and decreases
 
-WITH Category_transaction2021 as (
-    SELECT Year(O.order_date) as Year, S.category, sum(O.after_discount) as Total_transaction2021  
+WITH CT2021 as (
+    SELECT Year(O.order_date) as Year, S.category, sum(round(O.after_discount)) as Total_transaction2021  
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
     where Year(order_date) = 2021
     and O.is_valid = 1
     Group by S.category
     ),
-    Category_transaction2022 as (
-    SELECT Year(O.order_date) as Year, S.category, sum(O.after_discount) as Total_transaction2022  
+    CT2022 as (
+    SELECT Year(O.order_date) as Year, S.category, sum(round(O.after_discount)) as Total_transaction2022  
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
     where Year(order_date) = 2022
     and O.is_valid = 1
     Group by S.category
     )
-SELECT  Category_transaction2021.Category, Total_transaction2021, Total_transaction2022,
+SELECT  CT2021.Category, Total_transaction2021, Total_transaction2022,
         ((Total_transaction2022-Total_transaction2021)/Total_transaction2021)*100 as GrowPercentage,
         CASE 
             When Total_transaction2022 > Total_transaction2021 Then 'Increase'
             When Total_transaction2022 < Total_transaction2021 Then 'Decrease'
-        END as Exp
-FROM Category_transaction2021
-Join Category_transaction2022 on (Category_transaction2022.category = Category_transaction2021.category)
+        END as Expl
+FROM CT2021
+Join CT2022 on (CT2022.category = CT2021.category)
 Order by GrowPercentage desc;
 
 
 -- Base on order, find top 5 payment methode mostly used
 
-SELECT  O.payment_Id, P.payment_method, count(O.qty_ordered) as Total_Order 
+SELECT  O.payment_Id, P.payment_method, count(DISTINCT O.Id_order) as Total_Order 
 FROM order_detail as O
 Join payment_detail as P on (P.payment_Id = O.payment_Id)
 WHERE O.is_valid = 1
@@ -99,8 +100,8 @@ WITH Gadget_Order as (
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
     WHERE O.is_valid = 1 and S.sku_name like '%lenovo%')
 SELECT  Product_brand,
-        sum(Total_order) as Total_order, 
-        sum(Total_Transaction) as Total_Transaction 
+        sum(round(Total_order)) as Total_order, 
+        sum(round(Total_Transaction)) as Total_Transaction 
 FROM Gadget_Order
 GROUP by Product_brand
 ORDER by Total_Transaction Desc;
@@ -122,8 +123,8 @@ WITH Gadget_Order as (
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
     WHERE O.is_valid = 1)
 SELECT  Product_brand,
-        sum(Total_order) as Total_order, 
-        sum(Total_Transaction) as Total_Transaction
+        sum(round(Total_order)) as Total_order, 
+        sum(round(Total_Transaction)) as Total_Transaction
 FROM Gadget_Order
 WHERE Product_brand is not null
 GROUP by Product_brand
