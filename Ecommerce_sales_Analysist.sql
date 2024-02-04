@@ -57,6 +57,7 @@ SELECT  O.payment_Id, P.payment_method, count(DISTINCT O.Id_order) as Total_Orde
 FROM order_detail as O
 Join payment_detail as P on (P.payment_Id = O.payment_Id)
 WHERE O.is_valid = 1
+AND Year(order_date) = 2022
 GROUP by P.payment_method
 ORDER by Total_Order desc
 Limit 5;
@@ -77,7 +78,7 @@ WITH Gadget_Order as (
             O.qty_ordered as Total_order, O.after_discount as Total_Transaction   
     FROM order_detail as O
     Join sku_detail as S on (S.sku_Id = O.Id_sku)
-    WHERE O.is_valid = 1 and S.sku_name like '%apple%' or S.sku_name like '%iphone%'
+    WHERE O.is_valid = 1 and S.sku_name like '%apple%' or S.sku_name like '%iphone%' or S.sku_name like '%imac%'
         UNION
     SELECT  DISTINCT O.Id_order as ID_Order, 
             S.sku_name as Product_name, 'Sony' as Product_brand, 
